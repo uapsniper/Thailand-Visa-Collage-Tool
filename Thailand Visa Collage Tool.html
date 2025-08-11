@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thailand Visa Collage Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .collage-item {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        .collage-item:hover {
+            transform: scale(1.05) rotate(1deg);
+            z-index: 10;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+        
+        .upload-zone {
+            border: 2px dashed #cbd5e1;
+            background: #f8fafc;
+            transition: all 0.3s ease;
+        }
+        .upload-zone:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+        .upload-zone.dragover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .thai-gradient {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn-thai {
+            background: linear-gradient(135deg, #dc2626 0%, #e11d48 100%);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-thai::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        .btn-thai:hover::before {
+            left: 100%;
+        }
+        .btn-thai:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(220, 38, 38, 0.4);
+        }
+        
+        .grid-layout {
+            display: grid;
+            gap: 12px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-auto-rows: 220px;
+        }
+        .mosaic-layout {
+            display: grid;
+            gap: 8px;
+            grid-template-columns: repeat(4, 1fr);
+            grid-auto-rows: 160px;
+        }
+        .pinterest-layout {
+            column-count: 4;
+            column-gap: 12px;
+        }
+        .pinterest-item {
+            break-inside: avoid;
+            margin-bottom: 12px;
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .title-glow {
+            text-shadow: 0 0 20px rgba(220, 38, 38, 0.3);
+        }
+    </style>
+</head>
+<body class="thai-gradient min-h-screen relative overflow-x-hidden">
+
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="text-center mb-8 relative">
+            <div class="inline-block mb-4">
+                <div class="w-16 h-12 rounded-lg shadow-lg mx-auto overflow-hidden">
+                    <div class="w-full h-1/5 bg-red-600"></div>
+                    <div class="w-full h-1/5 bg-white"></div>
+                    <div class="w-full h-1/5 bg-blue-600"></div>
+                    <div class="w-full h-1/5 bg-white"></div>
+                    <div class="w-full h-1/5 bg-red-600"></div>
+                </div>
+            </div>
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">Thailand Visa Collage Tool</h1>
+            <p class="text-gray-600 text-lg">Create beautiful collages for your visa application</p>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <div id="uploadZone" class="upload-zone rounded-lg p-8 text-center cursor-pointer">
+                <div class="mb-4">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </div>
+                <p class="text-lg font-medium text-gray-700 mb-2">Drop images here or click to upload</p>
+                <p class="text-sm text-gray-500">Support for JPG, PNG, GIF files</p>
+                <input type="file" id="fileInput" multiple accept="image/*" class="hidden">
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <div class="flex flex-wrap gap-6 items-center justify-between">
+                <div class="flex gap-4 items-center">
+                    <label class="text-sm font-medium text-gray-700">Layout:</label>
+                    <select id="layoutSelect" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        <option value="pinterest">📌 Pinterest Style</option>
+                        <option value="grid">⬜ Grid Layout</option>
+                        <option value="mosaic">🧩 Mosaic Layout</option>
+                    </select>
+                </div>
+                <div class="flex gap-2">
+                    <button id="shuffleBtn" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                        🔀 Shuffle
+                    </button>
+                    <button id="downloadBtn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                        📥 Download
+                    </button>
+                    <button id="clearBtn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                        🗑️ Clear All
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Download Options Modal -->
+        <div id="downloadModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full mx-4">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">Download Options</h3>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Preset</label>
+                        <select id="presetSelect" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 mb-3">
+                            <option value="thailand-visa">🏴 For Thailand Visa - JPG - MAX 3MB</option>
+                            <option value="custom">Custom Settings</option>
+                        </select>
+                    </div>
+                    
+                    <div id="customSettings" class="hidden">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Size</label>
+                            <select id="sizeSelect" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                                <option value="1200x800">Medium (1200x800)</option>
+                                <option value="1920x1080">Large (1920x1080)</option>
+                                <option value="2560x1440">Extra Large (2560x1440)</option>
+                                <option value="custom">Custom Size</option>
+                            </select>
+                        </div>
+                    
+                        <div id="customSizeInputs" class="hidden">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Width</label>
+                                    <input type="number" id="customWidth" value="1200" min="100" max="5000" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Height</label>
+                                    <input type="number" id="customHeight" value="800" min="100" max="5000" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Format</label>
+                            <select id="formatSelect" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                                <option value="png">PNG (Best Quality)</option>
+                                <option value="jpeg">JPEG (Smaller File)</option>
+                            </select>
+                        </div>
+                        
+                        <div id="qualitySection" class="hidden">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Quality</label>
+                            <input type="range" id="qualitySlider" min="0.1" max="1" step="0.1" value="0.9" class="w-full">
+                            <div class="flex justify-between text-xs text-gray-500">
+                                <span>Lower</span>
+                                <span id="qualityValue">90%</span>
+                                <span>Higher</span>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Background</label>
+                            <div class="flex gap-2">
+                                <button id="bgWhite" class="flex-1 px-3 py-2 border-2 border-gray-300 rounded-lg bg-white text-gray-700 hover:border-green-500 transition-colors">White</button>
+                                <button id="bgTransparent" class="flex-1 px-3 py-2 border-2 border-gray-300 rounded-lg bg-gray-100 text-gray-700 hover:border-green-500 transition-colors">Transparent</button>
+                                <input type="color" id="bgColor" value="#ffffff" class="w-12 h-10 border-2 border-gray-300 rounded-lg cursor-pointer">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex gap-3 mt-6">
+                    <button id="cancelDownload" class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">Cancel</button>
+                    <button id="confirmDownload" class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">Download</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Collage Display -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <div id="collageContainer" class="pinterest-layout min-h-64">
+                <div class="flex items-center justify-center text-gray-400 col-span-full">
+                    <div class="text-center">
+                        <svg class="mx-auto h-16 w-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        <p class="text-lg">Your collage will appear here</p>
+                        <p class="text-sm">Upload some images to get started!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let uploadedImages = [];
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        const collageContainer = document.getElementById('collageContainer');
+        const layoutSelect = document.getElementById('layoutSelect');
+        const shuffleBtn = document.getElementById('shuffleBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const clearBtn = document.getElementById('clearBtn');
+
+        // Upload zone click handler
+        uploadZone.addEventListener('click', () => fileInput.click());
+
+        // File input change handler
+        fileInput.addEventListener('change', handleFiles);
+
+        // Drag and drop handlers
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            handleFiles({ target: { files: e.dataTransfer.files } });
+        });
+
+        // Handle file uploads
+        function handleFiles(event) {
+            const files = Array.from(event.target.files);
+            files.forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        uploadedImages.push({
+                            src: e.target.result,
+                            name: file.name,
+                            id: Date.now() + Math.random()
+                        });
+                        renderCollage();
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // Render collage based on selected layout
+        function renderCollage() {
+            if (uploadedImages.length === 0) {
+                collageContainer.innerHTML = `
+                    <div class="flex items-center justify-center text-gray-400 col-span-full">
+                        <div class="text-center">
+                            <svg class="mx-auto h-16 w-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <p class="text-lg">Your collage will appear here</p>
+                            <p class="text-sm">Upload some images to get started!</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            const layout = layoutSelect.value;
+            collageContainer.className = `${layout}-layout`;
+            
+            let html = '';
+            uploadedImages.forEach((image, index) => {
+                const randomSpan = Math.random() > 0.7 ? 'col-span-2' : '';
+                const randomRowSpan = Math.random() > 0.8 ? 'row-span-2' : '';
+                
+                if (layout === 'pinterest') {
+                    html += `
+                        <div class="pinterest-item collage-item relative group cursor-pointer">
+                            <img src="${image.src}" alt="${image.name}" class="w-full h-auto rounded-lg shadow-md object-cover">
+                            <button onclick="removeImage(${index})" class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs">×</button>
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="collage-item relative group cursor-pointer ${layout === 'mosaic' ? randomSpan + ' ' + randomRowSpan : ''}">
+                            <img src="${image.src}" alt="${image.name}" class="w-full h-full object-cover rounded-lg shadow-md">
+                            <button onclick="removeImage(${index})" class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs">×</button>
+                        </div>
+                    `;
+                }
+            });
+            
+            collageContainer.innerHTML = html;
+        }
+
+        // Remove image from collage
+        function removeImage(index) {
+            uploadedImages.splice(index, 1);
+            renderCollage();
+        }
+
+        // Shuffle images
+        shuffleBtn.addEventListener('click', () => {
+            uploadedImages = uploadedImages.sort(() => Math.random() - 0.5);
+            renderCollage();
+        });
+
+        // Layout change handler
+        layoutSelect.addEventListener('change', renderCollage);
+
+        // Download modal elements
+        const downloadModal = document.getElementById('downloadModal');
+        const presetSelect = document.getElementById('presetSelect');
+        const customSettings = document.getElementById('customSettings');
+        const sizeSelect = document.getElementById('sizeSelect');
+        const customSizeInputs = document.getElementById('customSizeInputs');
+        const customWidth = document.getElementById('customWidth');
+        const customHeight = document.getElementById('customHeight');
+        const formatSelect = document.getElementById('formatSelect');
+        const qualitySection = document.getElementById('qualitySection');
+        const qualitySlider = document.getElementById('qualitySlider');
+        const qualityValue = document.getElementById('qualityValue');
+        const bgWhite = document.getElementById('bgWhite');
+        const bgTransparent = document.getElementById('bgTransparent');
+        const bgColor = document.getElementById('bgColor');
+        const cancelDownload = document.getElementById('cancelDownload');
+        const confirmDownload = document.getElementById('confirmDownload');
+
+        let selectedBackground = 'white';
+
+        // Show download modal
+        downloadBtn.addEventListener('click', () => {
+            if (uploadedImages.length === 0) {
+                alert('Please upload some images first!');
+                return;
+            }
+            // For quick download, use Thailand visa preset directly
+            downloadCollageWithPreset();
+        });
+
+        // Quick download function - opens native Save dialog (when supported) and enforces JPG <= 3MB
+        async function downloadCollageWithPreset() {
+            const width = 3840;
+            const height = 2880;
+
+            // Create canvas
+            let canvas = document.createElement('canvas');
+            let ctx = canvas.getContext('2d');
+            canvas.width = width;
+            canvas.height = height;
+
+            // Set white background
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, width, height);
+
+            // Calculate grid layout
+            const cols = Math.ceil(Math.sqrt(uploadedImages.length));
+            const rows = Math.ceil(uploadedImages.length / cols);
+            const cellWidth = width / cols;
+            const cellHeight = height / rows;
+            const padding = 8;
+
+            let loadedImages = 0;
+            const totalImages = uploadedImages.length;
+
+            uploadedImages.forEach((imageData, index) => {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = async () => {
+                    const col = index % cols;
+                    const row = Math.floor(index / cols);
+                    const x = col * cellWidth + padding;
+                    const y = row * cellHeight + padding;
+                    const w = cellWidth - padding * 2;
+                    const h = cellHeight - padding * 2;
+
+                    // Draw image with proper aspect ratio
+                    const imgAspect = img.width / img.height;
+                    const cellAspect = w / h;
+                    
+                    let drawWidth, drawHeight, drawX, drawY;
+                    
+                    if (imgAspect > cellAspect) {
+                        drawWidth = w;
+                        drawHeight = w / imgAspect;
+                        drawX = x;
+                        drawY = y + (h - drawHeight) / 2;
+                    } else {
+                        drawWidth = h * imgAspect;
+                        drawHeight = h;
+                        drawX = x + (w - drawWidth) / 2;
+                        drawY = y;
+                    }
+
+                    // Draw image with rounded corners
+                    ctx.save();
+                    ctx.beginPath();
+                    const radius = 8;
+                    ctx.moveTo(drawX + radius, drawY);
+                    ctx.lineTo(drawX + drawWidth - radius, drawY);
+                    ctx.quadraticCurveTo(drawX + drawWidth, drawY, drawX + drawWidth, drawY + radius);
+                    ctx.lineTo(drawX + drawWidth, drawY + drawHeight - radius);
+                    ctx.quadraticCurveTo(drawX + drawWidth, drawY + drawHeight, drawX + drawWidth - radius, drawY + drawHeight);
+                    ctx.lineTo(drawX + radius, drawY + drawHeight);
+                    ctx.quadraticCurveTo(drawX, drawY + drawHeight, drawX, drawY + drawHeight - radius);
+                    ctx.lineTo(drawX, drawY + radius);
+                    ctx.quadraticCurveTo(drawX, drawY, drawX + radius, drawY);
+                    ctx.closePath();
+                    ctx.clip();
+                    ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+                    ctx.restore();
+
+                    loadedImages++;
+
+                    if (loadedImages === totalImages) {
+                        // Create JPEG blob and save via native Save dialog if available
+                        try {
+                            const maxBytes = 3 * 1024 * 1024; // 3MB
+                            let quality = 0.95;
+                            const toBlob = (q) => new Promise(resolve => canvas.toBlob(b => resolve(b), 'image/jpeg', q));
+                            let blob = await toBlob(quality);
+                            while (blob && blob.size > maxBytes && quality > 0.3) {
+                                quality = Math.max(0.3, quality - 0.05);
+                                blob = await toBlob(quality);
+                            }
+
+                            // If still too large at min quality, progressively downscale dimensions until <= 3MB or min size
+                            while (blob && blob.size > maxBytes && canvas.width > 1600 && canvas.height > 1200) {
+                                const scaled = document.createElement('canvas');
+                                scaled.width = Math.round(canvas.width * 0.9);
+                                scaled.height = Math.round(canvas.height * 0.9);
+                                const sctx = scaled.getContext('2d');
+                                sctx.drawImage(canvas, 0, 0, scaled.width, scaled.height);
+                                canvas = scaled;
+                                ctx = canvas.getContext('2d');
+                                quality = 0.95;
+                                blob = await new Promise(resolve => canvas.toBlob(b => resolve(b), 'image/jpeg', quality));
+                                while (blob && blob.size > maxBytes && quality > 0.3) {
+                                    quality = Math.max(0.3, quality - 0.05);
+                                    blob = await new Promise(resolve => canvas.toBlob(b => resolve(b), 'image/jpeg', quality));
+                                }
+                            }
+
+                            const suggestedName = 'thailand-visa-collage.jpg';
+                            if (window.showSaveFilePicker) {
+                                const handle = await window.showSaveFilePicker({
+                                    suggestedName,
+                                    types: [{ description: 'JPEG Image', accept: { 'image/jpeg': ['.jpg', '.jpeg'] } }],
+                                    excludeAcceptAllOption: true,
+                                });
+                                const writable = await handle.createWritable();
+                                await writable.write(blob);
+                                await writable.close();
+                            } else {
+                                // Fallback to anchor download
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = suggestedName;
+                                document.body.appendChild(a);
+                                a.click();
+                                a.remove();
+                                URL.revokeObjectURL(url);
+                            }
+                        } catch (error) {
+                            console.error('Download error:', error);
+                            alert('Download failed. Please try again.');
+                        }
+                    }
+                };
+                img.onerror = () => {
+                    console.error('Failed to load image:', imageData.name);
+                    loadedImages++;
+                    if (loadedImages === totalImages) {
+                        alert('Some images failed to load. Please try uploading again.');
+                    }
+                };
+                img.src = imageData.src;
+            });
+        }
+
+        // Hide download modal
+        cancelDownload.addEventListener('click', () => {
+            downloadModal.classList.add('hidden');
+        });
+
+        // Close modal when clicking outside
+        downloadModal.addEventListener('click', (e) => {
+            if (e.target === downloadModal) {
+                downloadModal.classList.add('hidden');
+            }
+        });
+
+        // Handle preset selection
+        presetSelect.addEventListener('change', () => {
+            if (presetSelect.value === 'thailand-visa') {
+                customSettings.classList.add('hidden');
+                // Set Thailand visa defaults
+                formatSelect.value = 'jpeg';
+                qualitySlider.value = 0.8;
+                qualityValue.textContent = '80%';
+                selectedBackground = 'white';
+                updateBackgroundButtons();
+            } else {
+                customSettings.classList.remove('hidden');
+            }
+            
+            // Update format visibility
+            if (formatSelect.value === 'jpeg') {
+                qualitySection.classList.remove('hidden');
+            } else {
+                qualitySection.classList.add('hidden');
+            }
+        });
+
+        // Handle size selection
+        sizeSelect.addEventListener('change', () => {
+            if (sizeSelect.value === 'custom') {
+                customSizeInputs.classList.remove('hidden');
+            } else {
+                customSizeInputs.classList.add('hidden');
+            }
+        });
+
+        // Handle format selection
+        formatSelect.addEventListener('change', () => {
+            if (formatSelect.value === 'jpeg') {
+                qualitySection.classList.remove('hidden');
+            } else {
+                qualitySection.classList.add('hidden');
+            }
+        });
+
+        // Update quality display
+        qualitySlider.addEventListener('input', () => {
+            qualityValue.textContent = Math.round(qualitySlider.value * 100) + '%';
+        });
+
+        // Background selection
+        bgWhite.addEventListener('click', () => {
+            selectedBackground = 'white';
+            updateBackgroundButtons();
+        });
+
+        bgTransparent.addEventListener('click', () => {
+            selectedBackground = 'transparent';
+            updateBackgroundButtons();
+        });
+
+        bgColor.addEventListener('change', () => {
+            selectedBackground = 'color';
+            updateBackgroundButtons();
+        });
+
+        function updateBackgroundButtons() {
+            bgWhite.classList.remove('border-green-500', 'bg-green-50');
+            bgTransparent.classList.remove('border-green-500', 'bg-green-50');
+            
+            if (selectedBackground === 'white') {
+                bgWhite.classList.add('border-green-500', 'bg-green-50');
+            } else if (selectedBackground === 'transparent') {
+                bgTransparent.classList.add('border-green-500', 'bg-green-50');
+            }
+        }
+
+        // Confirm download
+        confirmDownload.addEventListener('click', () => {
+            downloadCollage();
+            downloadModal.classList.add('hidden');
+        });
+
+        function downloadCollage() {
+            // Get dimensions based on preset
+            let width, height;
+            if (presetSelect.value === 'thailand-visa') {
+                // Higher starting resolution for better readability; will compress/downscale if needed to stay <=3MB
+                width = 3840;
+                height = 2880;
+            } else if (sizeSelect.value === 'custom') {
+                width = parseInt(customWidth.value);
+                height = parseInt(customHeight.value);
+            } else {
+                const [w, h] = sizeSelect.value.split('x').map(Number);
+                width = w;
+                height = h;
+            }
+
+            // Create canvas
+            let canvas = document.createElement('canvas');
+            let ctx = canvas.getContext('2d');
+            canvas.width = width;
+            canvas.height = height;
+
+            // Set background
+            if (selectedBackground === 'white') {
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, width, height);
+            } else if (selectedBackground === 'color') {
+                ctx.fillStyle = bgColor.value;
+                ctx.fillRect(0, 0, width, height);
+            }
+
+            // Calculate grid layout
+            const cols = Math.ceil(Math.sqrt(uploadedImages.length));
+            const rows = Math.ceil(uploadedImages.length / cols);
+            const cellWidth = width / cols;
+            const cellHeight = height / rows;
+            const padding = 4;
+
+            let loadedImages = 0;
+            uploadedImages.forEach((imageData, index) => {
+                const img = new Image();
+                img.onload = async () => {
+                    const col = index % cols;
+                    const row = Math.floor(index / cols);
+                    const x = col * cellWidth + padding;
+                    const y = row * cellHeight + padding;
+                    const w = cellWidth - padding * 2;
+                    const h = cellHeight - padding * 2;
+
+                    // Draw image with proper aspect ratio
+                    const imgAspect = img.width / img.height;
+                    const cellAspect = w / h;
+                    
+                    let drawWidth, drawHeight, drawX, drawY;
+                    
+                    if (imgAspect > cellAspect) {
+                        drawWidth = w;
+                        drawHeight = w / imgAspect;
+                        drawX = x;
+                        drawY = y + (h - drawHeight) / 2;
+                    } else {
+                        drawWidth = h * imgAspect;
+                        drawHeight = h;
+                        drawX = x + (w - drawWidth) / 2;
+                        drawY = y;
+                    }
+
+                    ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+                    loadedImages++;
+
+                    if (loadedImages === uploadedImages.length) {
+                        // Always save as JPEG and enforce <= 3MB, with native Save dialog when supported
+                        try {
+                            const maxBytes = 3 * 1024 * 1024; // 3MB
+                            // Start with higher quality for readability; reduce only if needed
+                            let quality = presetSelect.value === 'thailand-visa' ? 0.95 : 0.95;
+                            const toBlob = (q) => new Promise(resolve => canvas.toBlob(b => resolve(b), 'image/jpeg', q));
+                            let blob = await toBlob(quality);
+                            while (blob && blob.size > maxBytes && quality > 0.3) {
+                                quality = Math.max(0.3, quality - 0.05);
+                                blob = await toBlob(quality);
+                            }
+
+                            // If still too large at min quality, progressively downscale dimensions until <= 3MB or min size
+                            while (blob && blob.size > maxBytes && canvas.width > 1600 && canvas.height > 1200) {
+                                const scaled = document.createElement('canvas');
+                                scaled.width = Math.round(canvas.width * 0.9);
+                                scaled.height = Math.round(canvas.height * 0.9);
+                                const sctx = scaled.getContext('2d');
+                                sctx.drawImage(canvas, 0, 0, scaled.width, scaled.height);
+                                canvas = scaled;
+                                ctx = canvas.getContext('2d');
+                                quality = 0.95;
+                                blob = await new Promise(resolve => canvas.toBlob(b => resolve(b), 'image/jpeg', quality));
+                                while (blob && blob.size > maxBytes && quality > 0.3) {
+                                    quality = Math.max(0.3, quality - 0.05);
+                                    blob = await new Promise(resolve => canvas.toBlob(b => resolve(b), 'image/jpeg', quality));
+                                }
+                            }
+
+                            const suggestedName = presetSelect.value === 'thailand-visa' ? 'thailand-visa-collage.jpg' : 'collage.jpg';
+                            if (window.showSaveFilePicker) {
+                                const handle = await window.showSaveFilePicker({
+                                    suggestedName,
+                                    types: [{ description: 'JPEG Image', accept: { 'image/jpeg': ['.jpg', '.jpeg'] } }],
+                                    excludeAcceptAllOption: true,
+                                });
+                                const writable = await handle.createWritable();
+                                await writable.write(blob);
+                                await writable.close();
+                            } else {
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = suggestedName;
+                                document.body.appendChild(a);
+                                a.click();
+                                a.remove();
+                                URL.revokeObjectURL(url);
+                            }
+                        } catch (err) {
+                            console.error('Download error:', err);
+                            alert('Download failed. Please try again.');
+                        }
+                    }
+                };
+                img.src = imageData.src;
+            });
+        }
+
+        // Clear all images
+        clearBtn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to clear all images?')) {
+                uploadedImages = [];
+                renderCollage();
+            }
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96d73509a4ccc21d',t:'MTc1NDkwOTc5NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
